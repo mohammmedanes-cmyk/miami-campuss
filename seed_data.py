@@ -5,56 +5,56 @@ from database import DATABASE, init_db
 SAMPLE_USERS = [
     {
         "full_name": "Sarah Mansouri",
-        "email": "sarah.m@student.miami.edu",
+        "email": "sarah.m@student.philadelphia.edu",
         "password": "password123",
         "specialty": "Computer Science & IT",
         "country": "Algeria",
-        "bio": "Junior CS student at Miami Campus. Working on artificial intelligence, distributed systems, and campus hackathons.",
+        "bio": "Junior CS student at Philadelphia Campus. Working on artificial intelligence, distributed systems, and campus hackathons.",
         "avatar_color": "#1E3A8A"  # Navy Blue
     },
     {
         "full_name": "Lucas Dubois",
-        "email": "lucas.d@student.miami.edu",
+        "email": "lucas.d@student.philadelphia.edu",
         "password": "password123",
         "specialty": "Medicine & Healthcare",
         "country": "France",
-        "bio": "Pre-med student at Miami Campus researching clinical diagnostics and human anatomy.",
+        "bio": "Pre-med student at Philadelphia Campus researching clinical diagnostics and human anatomy.",
         "avatar_color": "#DC2626"  # Crimson Red
     },
     {
         "full_name": "Amina El-Sayed",
-        "email": "amina.e@student.miami.edu",
+        "email": "amina.e@student.philadelphia.edu",
         "password": "password123",
         "specialty": "Business Administration & Management",
         "country": "Egypt",
-        "bio": "Senior business student at Miami Campus. Lead coordinator at the campus entrepreneurship incubator.",
+        "bio": "Senior business student at Philadelphia Campus. Lead coordinator at the campus entrepreneurship incubator.",
         "avatar_color": "#B91C1C"  # Dark Red
     },
     {
         "full_name": "Marcus Vance",
-        "email": "marcus.v@student.miami.edu",
+        "email": "marcus.v@student.philadelphia.edu",
         "password": "password123",
         "specialty": "Mechanical Engineering",
         "country": "United States",
-        "bio": "Miami Campus engineering senior. President of the University Robotics & Autonomous Vehicles Society.",
+        "bio": "Philadelphia Campus engineering senior. President of the University Robotics & Autonomous Vehicles Society.",
         "avatar_color": "#2563EB"  # Royal Blue
     },
     {
         "full_name": "Elena Weber",
-        "email": "elena.w@student.miami.edu",
+        "email": "elena.w@student.philadelphia.edu",
         "password": "password123",
         "specialty": "Law & International Relations",
         "country": "Germany",
-        "bio": "Exchange student at Miami Campus focusing on international trade regulation and student legal clinics.",
+        "bio": "Exchange student at Philadelphia Campus focusing on constitutional law and international trade regulation.",
         "avatar_color": "#172554"  # Deep Navy
     },
     {
         "full_name": "Omar Kaci",
-        "email": "omar.k@student.miami.edu",
+        "email": "omar.k@student.philadelphia.edu",
         "password": "password123",
         "specialty": "Computer Science & IT",
         "country": "Algeria",
-        "bio": "Sophomore CS student passionate about mobile development and algorithms.",
+        "bio": "Sophomore CS student passionate about mobile development, algorithms, and cloud infrastructure.",
         "avatar_color": "#1D4ED8"
     }
 ]
@@ -62,13 +62,13 @@ SAMPLE_USERS = [
 SAMPLE_POSTS = [
     {
         "user_index": 0,  # Sarah Mansouri (CS, Algeria)
-        "title": "Miami Campus Midterm Revision: Algorithm Analysis & Dynamic Programming study group",
-        "content": "Hey everyone! For the upcoming CSC 317 exam next Thursday, we have booked study room 304 in Richter Library on Wednesday from 4 PM to 7 PM. We'll be reviewing graph traversal algorithms, Bellman-Ford, and dynamic programming memoization. All Miami Campus CS students are welcome to drop by!",
+        "title": "Philadelphia Campus Midterm Revision: Algorithm Analysis & Dynamic Programming study group",
+        "content": "Hey everyone! For the upcoming CS 317 exam next Thursday, we have booked study room 304 in Van Pelt Library on Wednesday from 4 PM to 7 PM. We'll be reviewing graph traversal algorithms, Bellman-Ford, and dynamic programming memoization. All Philadelphia Campus CS students are welcome to drop by!",
         "specialty": "Computer Science & IT"
     },
     {
         "user_index": 5,  # Omar Kaci (CS, Algeria)
-        "title": "Best IDE setup and debugging tools for Operating Systems (CSC 421)",
+        "title": "Best IDE setup and debugging tools for Operating Systems (CS 421)",
         "content": "Hello fellow CS classmates! What debugger or Linux environment are you using for the multi-threading and semaphore assignment? Looking for recommendations between VS Code Remote SSH and CLion.",
         "specialty": "Computer Science & IT"
     },
@@ -80,20 +80,20 @@ SAMPLE_POSTS = [
     },
     {
         "user_index": 2,  # Amina El-Sayed (Business, Egypt)
-        "title": "Miami Campus Startup Pitch Competition 2026 - Looking for team members!",
-        "content": "The annual Miami Campus Venture Challenge submissions open in 3 weeks. Our team is developing an intelligent student notes sharing and peer tutoring app. We are looking for business and marketing students to collaborate on the pitch deck.",
+        "title": "Philadelphia Campus Venture Challenge 2026 - Looking for team members!",
+        "content": "The annual Philadelphia Campus Venture Challenge submissions open in 3 weeks. Our team is developing an intelligent student notes sharing and peer tutoring app. We are looking for business and marketing students to collaborate on the pitch deck.",
         "specialty": "Business Administration & Management"
     },
     {
         "user_index": 3,  # Marcus Vance (Engineering, USA)
         "title": "3D Printers access in the Engineering Innovation Lab over the weekend",
-        "content": "Quick reminder for mechanical engineering students: the makerspace in McArthur Hall will have extended open hours this Saturday from 10 AM to 6 PM for capstone project prototyping. Make sure to bring your STL files pre-sliced.",
+        "content": "Quick reminder for mechanical engineering students: the makerspace in Towne Hall will have extended open hours this Saturday from 10 AM to 6 PM for capstone project prototyping. Make sure to bring your STL files pre-sliced.",
         "specialty": "Mechanical Engineering"
     },
     {
         "user_index": 4,  # Elena Weber (Law, Germany)
-        "title": "International Moot Court competition prep and argument outlines",
-        "content": "For our international humanitarian law seminar, we are staging a mock appellate hearing next month. Law students who want to practice oral arguments and treaty citations, let's form a practice bench!",
+        "title": "Constitutional Law & International Moot Court competition prep",
+        "content": "For our constitutional and international law seminar, we are staging a mock appellate hearing next month. Law students who want to practice oral arguments and treaty citations, let's form a practice bench!",
         "specialty": "Law & International Relations"
     }
 ]
@@ -117,13 +117,13 @@ SAMPLE_COMMENTS = [
 ]
 
 def seed_database():
-    print("Initializing Miami Campus private database...")
+    print("Initializing Philadelphia Campus private database...")
     init_db()
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
     user_ids = []
-    print("Creating verified Miami Campus student accounts...")
+    print("Creating verified Philadelphia Campus student accounts...")
     for user in SAMPLE_USERS:
         pwd_hash = generate_password_hash(user["password"])
         cursor.execute(
@@ -134,7 +134,7 @@ def seed_database():
         user_ids.append(cursor.lastrowid)
 
     post_ids = []
-    print("Creating Miami Campus specialty discussions...")
+    print("Creating Philadelphia Campus specialty discussions...")
     for post in SAMPLE_POSTS:
         author_id = user_ids[post["user_index"]]
         cursor.execute(
@@ -160,7 +160,7 @@ def seed_database():
 
     conn.commit()
     conn.close()
-    print("Miami Campus private database seeded successfully!")
+    print("Philadelphia Campus private database seeded successfully!")
 
 if __name__ == '__main__':
     seed_database()
