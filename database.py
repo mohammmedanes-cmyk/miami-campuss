@@ -25,5 +25,18 @@ def init_db():
     conn.commit()
     conn.close()
 
+def db_has_tables():
+    if not os.path.exists(DATABASE):
+        return False
+    try:
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+        row = cursor.fetchone()
+        conn.close()
+        return row is not None
+    except Exception:
+        return False
+
 def db_exists():
-    return os.path.exists(DATABASE)
+    return db_has_tables()

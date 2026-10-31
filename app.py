@@ -8,7 +8,7 @@ from flask import (
     url_for, flash, session, g, jsonify, abort, send_file
 )
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import get_db, close_db, init_db, db_exists
+from database import get_db, close_db, init_db, db_exists, db_has_tables
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'miami-campus-secure-student-portal-2026'
@@ -56,6 +56,19 @@ AVATAR_COLORS = [
     "#EF4444"   # Bright Red
 ]
 
+def ensure_db_initialized():
+    """Guarantees database and tables exist even when deployed to ephemeral cloud (Render/Gunicorn)."""
+    if not db_has_tables():
+        try:
+            from seed_data import seed_database
+            print("[*] Database tables missing. Auto-initializing Miami Campus database...")
+            seed_database()
+        except Exception as e:
+            print(f"[!] Error seeding database: {e}")
+
+# Run immediately when app.py is loaded by any WSGI server (Gunicorn, Waitress, Flask)
+ensure_db_initialized()
+
 def get_network_ip():
     """Finds the local LAN IP of this computer on the university network/Wi-Fi."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -95,6 +108,7 @@ def login_required(view):
 
 @app.before_request
 def load_logged_in_user():
+    ensure_db_initialized()
     user_id = session.get('user_id')
     client_user_id = request.headers.get('X-Student-Id')
     if not user_id and client_user_id and client_user_id.isdigit():
@@ -103,21 +117,30 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        db = get_db()
-        g.user = db.execute(
-            "SELECT id, full_name, email, specialty, country, bio, avatar_color, created_at FROM users WHERE id = ?",
-            (user_id,)
-        ).fetchone()
+        try:
+            db = get_db()
+            g.user = db.execute(
+                "SELECT id, full_name, email, specialty, country, bio, avatar_color, created_at FROM users WHERE id = ?",
+                (user_id,)
+            ).fetchone()
+        except Exception:
+            g.user = None
 
 @app.context_processor
 def inject_globals():
     lan_ip = get_network_ip()
+    host_url = request.host_url.rstrip('/')
+    if 'onrender.com' in host_url or not host_url.startswith('http://127.0.0.1'):
+        current_mobile_url = host_url
+    else:
+        current_mobile_url = f"http://{lan_ip}:5000"
+
     return {
         'app_name': APP_NAME,
         'popular_specialties': POPULAR_SPECIALTIES,
         'popular_countries': POPULAR_COUNTRIES,
         'lan_ip': lan_ip,
-        'mobile_url': f"http://{lan_ip}:5000"
+        'mobile_url': current_mobile_url
     }
 
 # -------------------------------------------------------------
@@ -127,9 +150,13 @@ def inject_globals():
 @app.route('/qr.png')
 def qr_image():
     """Generates an instant offline QR Code PNG for phone cameras to scan."""
-    lan_ip = get_network_ip()
-    mobile_url = f"http://{lan_ip}:5000"
-    img = qrcode.make(mobile_url)
+    host_url = request.host_url.rstrip('/')
+    if 'onrender.com' in host_url or not host_url.startswith('http://127.0.0.1'):
+        target_url = host_url
+    else:
+        lan_ip = get_network_ip()
+        target_url = f"http://{lan_ip}:5000"
+    img = qrcode.make(target_url)
     buf = io.BytesIO()
     img.save(buf, format='PNG')
     buf.seek(0)
@@ -138,8 +165,13 @@ def qr_image():
 @app.route('/mobile')
 def mobile_page():
     """Direct mobile instructions and QR code page."""
-    lan_ip = get_network_ip()
-    return render_template('mobile.html', mobile_url=f"http://{lan_ip}:5000", lan_ip=lan_ip)
+    host_url = request.host_url.rstrip('/')
+    if 'onrender.com' in host_url or not host_url.startswith('http://127.0.0.1'):
+        target_url = host_url
+    else:
+        lan_ip = get_network_ip()
+        target_url = f"http://{lan_ip}:5000"
+    return render_template('mobile.html', mobile_url=target_url, lan_ip=get_network_ip())
 
 # -------------------------------------------------------------
 # Authentication Routes (Private Campus)
@@ -308,7 +340,6 @@ def index():
 
     posts = db.execute(query, params).fetchall()
 
-    # Active countries of peers in the same specialty
     peer_countries = db.execute("""
         SELECT country, COUNT(*) as count
         FROM users
@@ -343,7 +374,6 @@ def index():
 @app.route('/post/new', methods=['GET', 'POST'])
 @login_required
 def new_post():
-    # Discussion is automatically restricted to student's registered specialty
     student_specialty = g.user['specialty']
 
     if request.method == 'POST':
@@ -556,7 +586,6 @@ def edit_profile():
         if error:
             flash(error, "error")
         else:
-            # Specialty is locked once registered to maintain strict department isolation
             db.execute("""
                 UPDATE users
                 SET full_name = ?, country = ?, bio = ?
@@ -664,7 +693,6 @@ def api_login():
 def api_discussions():
     db = get_db()
 
-    # Client must be authenticated to interact with private specialty discussions
     if not g.user:
         return jsonify({'success': False, 'error': 'Authentication required. Please sign in.'}), 401
 
@@ -686,7 +714,6 @@ def api_discussions():
         db.commit()
         return jsonify({'success': True, 'post_id': cursor.lastrowid, 'specialty': student_specialty}), 201
 
-    # GET request: STRICTLY filtered to student's own specialty
     country_filter = request.args.get('country')
     query = """
         SELECT p.id, p.title, p.content, p.specialty, p.created_at,
@@ -748,7 +775,6 @@ def api_discussion_detail(post_id):
     if not post:
         return jsonify({'success': False, 'error': 'Discussion not found'}), 404
 
-    # Enforce specialty isolation
     if post['specialty'] != g.user['specialty']:
         return jsonify({
             'success': False,
@@ -799,18 +825,16 @@ def api_discussion_detail(post_id):
 # -------------------------------------------------------------
 
 def start_server():
-    if not db_exists():
-        from seed_data import seed_database
-        print("Database not found. Initializing Miami Campus private portal...")
-        seed_database()
+    ensure_db_initialized()
 
 if __name__ == '__main__':
     start_server()
     lan_ip = get_network_ip()
+    port = int(os.environ.get('PORT', 5000))
     print("=========================================================")
     print(" 🏛️  Miami Campus - Private University Discussion Portal  ")
-    print(f" Local URL  : http://127.0.0.1:5000                     ")
-    print(f" Network URL: http://{lan_ip}:5000                      ")
+    print(f" Local URL  : http://127.0.0.1:{port}                   ")
+    print(f" Network URL: http://{lan_ip}:{port}                    ")
     print(" Red & Blue University Edition                           ")
     print("=========================================================")
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=port, host='0.0.0.0')
