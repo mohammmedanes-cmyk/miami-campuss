@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post['title'] }} - Philadelphia Campus{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-xs text-slate-500">
+        <a href="{{ url_for('index') }}" class="hover:text-blue-700 transition-colors font-semibold">Campus Discussions</a>
+        <i class="fa-solid fa-angle-right text-[10px] text-slate-400"></i>
+        <a href="{{ url_for('index', specialty=post['specialty']) }}" class="hover:text-red-600 font-bold text-red-600 transition-colors">
+            {{ post['specialty'] }}
+        </a>
+        <i class="fa-solid fa-angle-right text-[10px] text-slate-400"></i>
+        <span class="truncate max-w-[220px] text-slate-700 font-medium">{{ post['title'] }}</span>
+    </nav>
+
+    <!-- Main Discussion Card -->
+    <article class="bg-white rounded-3xl border-t-4 border-t-red-600 border-x border-b border-slate-200/90 shadow-sm p-6 sm:p-8">
+        
+        <!-- Post Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+            <!-- Author Card -->
+            <div class="flex items-center space-x-3.5">
+                <a href="{{ url_for('profile', user_id=post['user_id']) }}">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-base font-bold ring-2 ring-blue-600 shadow-xs hover:scale-105 transition-transform" style="background-color: {{ post['avatar_color'] }};">
+                        {{ post['full_name'][:1] | upper }}
+                    </div>
+                </a>
+                <div>
+                    <div class="flex items-center flex-wrap gap-2">
+                        <a href="{{ url_for('profile', user_id=post['user_id']) }}" class="text-base font-extrabold text-slate-900 hover:text-blue-700 transition-colors">
+                            {{ post['full_name'] }}
+                        </a>
+                        <!-- Specialty Badge (Blue) -->
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                            <i class="fa-solid fa-graduation-cap text-[10px] mr-1 text-blue-600"></i>{{ post['user_specialty'] }}
+                        </span>
+                        <!-- Country Badge (Red) -->
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-800 border border-red-200">
+                            <i class="fa-solid fa-earth-americas text-[10px] mr-1 text-red-500"></i>{{ post['country'] }}
+                        </span>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-1">
+                        Posted on {{ post['created_at'][:16] }} &bull; Philadelphia Campus
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category & Actions -->
+            <div class="flex items-center space-x-2 self-start sm:self-auto">
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-900 border border-blue-200">
+                    {{ post['specialty'] }}
+                </span>
+                {% if g.user and g.user['id'] == post['user_id'] %}
+                    <form action="{{ url_for('delete_post', post_id=post['id']) }}" method="POST" onsubmit="return confirm('Delete this Philadelphia Campus discussion?');">
+                        <button type="submit" title="Delete post" class="p-2 text-slate-400 hover:text-red-600 text-xs transition-colors">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Post Title -->
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 mt-6 mb-4 leading-tight">
+            {{ post['title'] }}
+        </h1>
+
+        <!-- Post Content Body -->
+        <div class="prose max-w-none text-slate-700 text-sm sm:text-base leading-relaxed whitespace-pre-line py-2">
+            {{ post['content'] }}
+        </div>
+
+        <!-- Post Footer / Actions (Red & Blue Accent) -->
+        <div class="flex items-center justify-between pt-6 mt-6 border-t border-slate-100">
+            <div class="flex items-center space-x-3">
+                <button onclick="togglePostLike({{ post['id'] }}, this)" 
+                        class="inline-flex items-center space-x-2 px-4 py-2 rounded-xl border text-sm {% if post['user_has_liked'] %}bg-red-50 text-red-600 border-red-300 font-bold{% else %}hover:bg-slate-50 text-slate-600 border-slate-200{% endif %} transition-colors">
+                    <i class="fa-{% if post['user_has_liked'] %}solid{% else %}regular{% endif %} fa-heart {% if post['user_has_liked'] %}text-red-600{% endif %}"></i>
+                    <span>Like</span>
+                    <span class="like-count font-black ml-1">({{ post['like_count'] }})</span>
+                </button>
+
+                <a href="#comments" class="inline-flex items-center space-x-2 px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-semibold transition-colors">
+                    <i class="fa-regular fa-comment text-blue-600"></i>
+                    <span>Campus Replies</span>
+                    <span class="font-bold ml-1">({{ comments | length }})</span>
+                </a>
+            </div>
+
+            <button onclick="copyPostLink()" class="p-2 text-slate-400 hover:text-blue-700 text-sm transition-colors" title="Copy discussion link">
+                <i class="fa-solid fa-share-nodes"></i>
+            </button>
+        </div>
+
+    </article>
+
+    <!-- Replies Section -->
+    <section id="comments" class="space-y-4">
+        
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-black text-slate-900 flex items-center">
+                <i class="fa-solid fa-comments text-red-600 mr-2"></i>Campus Discussion Replies 
+                <span class="ml-2 text-sm font-semibold text-blue-800">({{ comments | length }})</span>
+            </h2>
+        </div>
+
+        <!-- Add Reply Form -->
+        <div class="bg-white rounded-2xl border-t-4 border-t-blue-700 border-x border-b border-slate-200 p-5 shadow-xs">
+            <form action="{{ url_for('post_detail', post_id=post['id']) }}" method="POST" class="space-y-3">
+                <div class="flex items-start space-x-3">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1 ring-2 ring-red-500" style="background-color: {{ g.user['avatar_color'] }};">
+                        {{ g.user['full_name'][:1] | upper }}
+                    </div>
+                    <div class="flex-1">
+                        <textarea name="content" rows="3" required placeholder="Contribute to this discussion as {{ g.user['full_name'] }} ({{ g.user['specialty'] }})..."
+                                  class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-600 text-sm transition-all"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center space-x-1.5">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                        <span>Post Campus Reply</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Comments List -->
+        {% if comments %}
+            <div class="space-y-3">
+                {% for c in comments %}
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-3">
+                                <a href="{{ url_for('profile', user_id=c['user_id']) }}">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ring-1 ring-blue-500 shadow-xs" style="background-color: {{ c['avatar_color'] }};">
+                                        {{ c['full_name'][:1] | upper }}
+                                    </div>
+                                </a>
+                                <div>
+                                    <div class="flex items-center flex-wrap gap-1.5">
+                                        <a href="{{ url_for('profile', user_id=c['user_id']) }}" class="text-xs font-bold text-slate-900 hover:text-blue-700">
+                                            {{ c['full_name'] }}
+                                        </a>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                            {{ c['specialty'] }}
+                                        </span>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold text-red-800 bg-red-50 border border-red-200">
+                                            <i class="fa-solid fa-earth-americas text-[9px] mr-1 text-red-500"></i>{{ c['country'] }}
+                                        </span>
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 mt-0.5">
+                                        {{ c['created_at'][:16] }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comment Body -->
+                        <div class="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line pl-11">
+                            {{ c['content'] }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-500 text-sm">
+                <i class="fa-regular fa-comment-dots text-3xl text-slate-300 mb-2"></i>
+                <p>No replies yet. Be the first Philadelphia Campus student to answer!</p>
+            </div>
+        {% endif %}
+
+    </section>
+
+</div>
+
+<script>
+function copyPostLink() {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Philadelphia Campus discussion link copied to clipboard!');
+}
+</script>
+{% endblock %}

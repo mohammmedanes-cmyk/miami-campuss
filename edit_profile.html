@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Student Profile - Philadelphia Campus{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto my-6">
+
+    <div class="mb-6">
+        <a href="{{ url_for('profile', user_id=g.user['id']) }}" class="inline-flex items-center text-xs font-bold text-blue-800 hover:text-red-600 mb-2 transition-colors">
+            <i class="fa-solid fa-arrow-left mr-1.5"></i>Back to My Profile
+        </a>
+        <h1 class="text-2xl font-black text-slate-900">Edit Philadelphia Campus Profile</h1>
+        <p class="text-slate-500 text-sm mt-1">Update your academic major, country, or student bio.</p>
+    </div>
+
+    <div class="bg-white rounded-3xl border-t-8 border-t-blue-800 border-x border-b border-slate-200 p-6 sm:p-8 shadow-sm">
+        <form action="{{ url_for('edit_profile') }}" method="POST" class="space-y-6">
+            
+            <!-- Full Name -->
+            <div>
+                <label for="full_name" class="block text-sm font-bold text-slate-800 mb-1.5">
+                    <i class="fa-solid fa-id-card text-blue-700 mr-1.5"></i>Full Name <span class="text-red-600">*</span>
+                </label>
+                <input type="text" id="full_name" name="full_name" required
+                       class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-700 text-sm font-medium"
+                       value="{{ g.user['full_name'] }}">
+            </div>
+
+            <!-- Specialty & Country Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Specialty -->
+                <div>
+                    <label for="specialty" class="block text-sm font-bold text-slate-800 mb-1.5">
+                        <i class="fa-solid fa-book-bookmark text-blue-700 mr-1.5"></i>Specialty / Major <span class="text-red-600">*</span>
+                    </label>
+                    <select id="specialty" name="specialty" required onchange="handleSpecialtyEdit(this)"
+                            class="w-full px-3.5 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-700 text-sm bg-white">
+                        {% set found_specialty = false %}
+                        {% for spec in popular_specialties %}
+                            <option value="{{ spec }}" {% if g.user['specialty'] == spec %}{% set found_specialty = true %}selected{% endif %}>{{ spec }}</option>
+                        {% endfor %}
+                        <option value="Other" {% if not found_specialty %}selected{% endif %}>+ Other (Write custom specialty)</option>
+                    </select>
+
+                    <div id="custom_specialty_box" class="mt-2.5 {% if found_specialty %}hidden{% endif %}">
+                        <input type="text" id="custom_specialty" name="custom_specialty" placeholder="Enter custom specialty"
+                               class="w-full px-3.5 py-2.5 rounded-lg border border-blue-300 bg-blue-50/40 text-sm"
+                               value="{% if not found_specialty %}{{ g.user['specialty'] }}{% endif %}">
+                    </div>
+                </div>
+
+                <!-- Country -->
+                <div>
+                    <label for="country" class="block text-sm font-bold text-slate-800 mb-1.5">
+                        <i class="fa-solid fa-earth-americas text-red-600 mr-1.5"></i>Country <span class="text-red-600">*</span>
+                    </label>
+                    <select id="country" name="country" required onchange="handleCountryEdit(this)"
+                            class="w-full px-3.5 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-600/30 focus:border-red-600 text-sm bg-white">
+                        {% set found_country = false %}
+                        {% for c in popular_countries %}
+                            <option value="{{ c }}" {% if g.user['country'] == c %}{% set found_country = true %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                        <option value="Other" {% if not found_country %}selected{% endif %}>+ Other (Enter custom country)</option>
+                    </select>
+
+                    <div id="custom_country_box" class="mt-2.5 {% if found_country %}hidden{% endif %}">
+                        <input type="text" id="custom_country" name="custom_country" placeholder="Enter custom country"
+                               class="w-full px-3.5 py-2.5 rounded-lg border border-red-300 bg-red-50/40 text-sm"
+                               value="{% if not found_country %}{{ g.user['country'] }}{% endif %}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Bio -->
+            <div>
+                <label for="bio" class="block text-sm font-bold text-slate-800 mb-1.5">
+                    <i class="fa-solid fa-pen-nib text-blue-700 mr-1.5"></i>Student Bio / About You
+                </label>
+                <textarea id="bio" name="bio" rows="4" placeholder="Tell other Philadelphia Campus students about your academic research, projects, or interests..."
+                          class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-700 text-sm leading-relaxed">{{ g.user['bio'] }}</textarea>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end space-x-3 pt-2">
+                <a href="{{ url_for('profile', user_id=g.user['id']) }}" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 text-sm font-bold transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold uppercase tracking-wider text-sm rounded-xl shadow-md shadow-red-600/30 transition-all">
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+<script>
+function handleSpecialtyEdit(select) {
+    const box = document.getElementById('custom_specialty_box');
+    const input = document.getElementById('custom_specialty');
+    if (select.value === 'Other') {
+        box.classList.remove('hidden');
+        input.required = true;
+        input.focus();
+    } else {
+        box.classList.add('hidden');
+        input.required = false;
+    }
+}
+
+function handleCountryEdit(select) {
+    const box = document.getElementById('custom_country_box');
+    const input = document.getElementById('custom_country');
+    if (select.value === 'Other') {
+        box.classList.remove('hidden');
+        input.required = true;
+        input.focus();
+    } else {
+        box.classList.add('hidden');
+        input.required = false;
+    }
+}
+</script>
+{% endblock %}

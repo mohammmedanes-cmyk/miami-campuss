@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}Philadelphia Campus - American University Student Network{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        campus: {
+                            navy: '#0A192F',
+                            blue: '#1E3A8A',
+                            'blue-light': '#2563EB',
+                            'blue-soft': '#EFF6FF',
+                            red: '#DC2626',
+                            'red-dark': '#991B1B',
+                            'red-soft': '#FEF2F2',
+                            gold: '#F59E0B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    
+    <!-- PWA & Mobile Web App Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0A192F">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Philly Campus">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo_icon_192.png') }}">
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+
+    <!-- Top Campus Navigation Bar with American Touch -->
+    <header class="sticky top-0 z-50 bg-slate-900 border-b-4 border-red-600 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                
+                <!-- Philadelphia Campus Brand Logo -->
+                <div class="flex items-center space-x-3">
+                    <a href="{{ url_for('index') }}" class="flex items-center space-x-3 group">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-950 p-0.5 border-2 border-red-500 shadow-md shadow-red-600/30 group-hover:scale-105 transition-transform overflow-hidden flex items-center justify-center">
+                            <img src="{{ url_for('static', filename='images/logo_icon_192.png') }}" alt="Philadelphia Campus Logo" class="w-full h-full object-cover rounded-lg">
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="text-lg sm:text-2xl font-black text-white tracking-tight">PHILADELPHIA <span class="text-red-500">CAMPUS</span></span>
+                            </div>
+                            <span class="block text-[9px] sm:text-[10px] font-bold tracking-widest uppercase text-amber-400/90">
+                                <i class="fa-solid fa-bell text-[8px] text-amber-400 mr-1"></i>American Collegiate Network &bull; Est. 1776
+                            </span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Global Search Bar (Within Student's Specialty) -->
+                {% if g.user %}
+                <div class="hidden md:flex flex-1 max-w-xs lg:max-w-sm mx-4">
+                    <form action="{{ url_for('index') }}" method="GET" class="w-full relative">
+                        <input type="text" name="q" value="{{ request.args.get('q', '') }}" placeholder="Search in {{ g.user['specialty'] }}..." 
+                               class="w-full bg-slate-800 text-xs sm:text-sm text-slate-100 placeholder-slate-400 pl-9 pr-4 py-2 rounded-full border border-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 transition-all">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                        {% if request.args.get('country') %}
+                            <input type="hidden" name="country" value="{{ request.args.get('country') }}">
+                        {% endif %}
+                    </form>
+                </div>
+                {% endif %}
+
+                <!-- Actions: Wallpaper & Phone Install + User Menu -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    
+                    <!-- Phone Wallpaper & Install Button -->
+                    <a href="{{ url_for('mobile_page') }}" title="Android App & Mobile"
+                       class="inline-flex items-center space-x-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-linear-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-xs font-bold uppercase tracking-wider shadow-md shadow-red-600/30 transition-all">
+                        <i class="fa-brands fa-android text-white text-sm"></i>
+                        <span class="hidden sm:inline">Android App</span>
+                    </a>
+
+                    {% if g.user %}
+                        <a href="{{ url_for('student_card_page') }}" title="My Official Student ID Card" class="inline-flex items-center space-x-1.5 px-3 py-1.5 sm:px-3 sm:py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold uppercase tracking-wider rounded-xl border border-slate-700 shadow-sm transition-all">
+                            <i class="fa-solid fa-id-card text-amber-400"></i>
+                            <span class="hidden lg:inline">My ID Card</span>
+                        </a>
+                        <a href="{{ url_for('new_post') }}" class="inline-flex items-center space-x-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-blue-700 hover:bg-blue-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm transition-all">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                            <span class="hidden md:inline">New Post</span>
+                        </a>
+
+                        <!-- User Profile Menu -->
+                        <div class="flex items-center pl-2 space-x-2 sm:space-x-3 border-l border-slate-700">
+                            <a href="{{ url_for('profile', user_id=g.user['id']) }}" class="flex items-center space-x-2 hover:opacity-90 transition-opacity">
+                                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-bold ring-2 ring-red-500 shadow-xs" style="background-color: {{ g.user['avatar_color'] }};">
+                                    {{ g.user['full_name'][:1] | upper }}
+                                </div>
+                                <div class="hidden lg:block text-left">
+                                    <div class="text-xs font-bold text-white leading-tight">{{ g.user['full_name'] }}</div>
+                                    <div class="text-[10px] text-blue-200 truncate max-w-[120px]">{{ g.user['specialty'] }}</div>
+                                </div>
+                            </a>
+                            <a href="{{ url_for('logout') }}" title="Sign Out of Philadelphia Campus" class="p-1.5 text-slate-400 hover:text-red-400 transition-colors">
+                                <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
+                            </a>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="px-3 py-1.5 text-xs font-semibold text-blue-100 hover:text-white transition-colors">
+                            Sign In
+                        </a>
+                        <a href="{{ url_for('register') }}" class="px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs font-bold uppercase tracking-wider text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-sm shadow-red-600/30 transition-all">
+                            Join Campus
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- PWA Install Banner (Shown automatically on mobile devices) -->
+    <div id="pwaInstallBanner" class="hidden bg-linear-to-r from-slate-900 via-blue-950 to-slate-900 text-white border-b-2 border-red-500 py-2.5 px-4 shadow-md">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <img src="{{ url_for('static', filename='images/logo_icon_192.png') }}" class="w-7 h-7 rounded-lg">
+                <div class="text-xs">
+                    <span class="font-bold text-amber-400">Install Philadelphia Campus:</span>
+                    <span class="text-slate-200 hidden sm:inline">Add the app directly to your phone screen!</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="triggerPwaInstall()" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold rounded-lg uppercase tracking-wider">
+                    Add to Screen
+                </button>
+                <button onclick="document.getElementById('pwaInstallBanner').remove()" class="text-slate-400 hover:text-white text-xs px-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages Container -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="space-y-2">
+                    {% for category, message in messages %}
+                        <div class="flex items-center justify-between p-3.5 rounded-xl text-sm {% if category == 'error' %}bg-red-50 text-red-800 border-l-4 border-red-600{% elif category == 'success' %}bg-blue-50 text-blue-900 border-l-4 border-blue-600{% else %}bg-slate-100 text-slate-800 border-l-4 border-slate-600{% endif %} shadow-xs">
+                            <div class="flex items-center space-x-2">
+                                {% if category == 'error' %}
+                                    <i class="fa-solid fa-triangle-exclamation text-red-600"></i>
+                                {% elif category == 'success' %}
+                                    <i class="fa-solid fa-circle-check text-blue-600"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-circle-info text-blue-500"></i>
+                                {% endif %}
+                                <span class="font-medium text-xs sm:text-sm">{{ message }}</span>
+                            </div>
+                            <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 text-xs">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Page Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- University Footer -->
+    <footer class="bg-slate-900 border-t-2 border-red-600 mt-12 py-6 text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+            <div class="flex items-center justify-center space-x-2">
+                <span class="inline-flex items-center justify-center w-5 h-5 bg-red-600 text-white rounded text-[10px] font-bold">P</span>
+                <span class="font-bold text-white tracking-wide">Philadelphia Campus</span> &mdash; American Collegiate Student Network
+            </div>
+            <div class="flex flex-wrap items-center justify-center space-x-3 text-[11px]">
+                <a href="{{ url_for('mobile_page') }}" class="text-amber-400 hover:text-white font-semibold">
+                    <i class="fa-brands fa-android mr-1"></i>Android App
+                </a>
+                <span>&bull;</span>
+                <button onclick="togglePhoneModal()" class="text-blue-300 hover:text-white font-semibold">
+                    <i class="fa-solid fa-qrcode mr-1 text-red-400"></i>QR Code
+                </button>
+                <span>&bull;</span>
+                <span class="text-slate-400">Strict Specialty Isolation Active</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================================= -->
+    <!-- PHONE ACCESS QR CODE MODAL                                -->
+    <!-- ========================================================= -->
+    <div id="phoneModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border-t-8 border-t-red-600 border-x border-b border-slate-200 shadow-2xl relative">
+            <button onclick="togglePhoneModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-base p-1">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-center">
+                <div class="inline-flex p-3 bg-red-50 text-red-600 rounded-2xl mb-3 border border-red-200">
+                    <i class="fa-solid fa-mobile-screen-button text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Connect from Your Phone</h3>
+                <p class="text-xs text-slate-500 mt-1">Open Philadelphia Campus on your smartphone or tablet</p>
+                
+                <!-- Live QR Code Image -->
+                <div class="my-5 p-4 bg-slate-50 border-2 border-dashed border-blue-300 rounded-2xl inline-block shadow-inner">
+                    <img src="{{ url_for('qr_image') }}" alt="Philadelphia Campus Mobile QR Code" class="w-48 h-48 mx-auto rounded-xl">
+                </div>
+
+                <!-- Step by Step Instructions -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-3.5 text-left text-xs space-y-1.5 text-blue-950 mb-4">
+                    <div class="font-bold flex items-center text-blue-900">
+                        <i class="fa-solid fa-wifi text-red-600 mr-2"></i>Quick Access:
+                    </div>
+                    <div class="text-[11px] leading-relaxed text-slate-700">
+                        Scan the QR code with your phone camera or use the link below to open Philadelphia Campus and add it directly to your home screen.
+                    </div>
+                </div>
+
+                <!-- Direct Copyable Link -->
+                <div class="flex items-center space-x-2 bg-slate-100 p-2 rounded-xl border border-slate-300">
+                    <input type="text" readonly value="{{ mobile_url }}" id="mobileLinkInput" 
+                           class="bg-transparent text-xs font-mono text-slate-800 flex-1 px-2 outline-none font-bold">
+                    <button onclick="copyMobileUrl()" class="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition-colors">
+                        Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function togglePhoneModal() {
+        const modal = document.getElementById('phoneModal');
+        modal.classList.toggle('hidden');
+    }
+    function copyMobileUrl() {
+        const input = document.getElementById('mobileLinkInput');
+        navigator.clipboard.writeText(input.value);
+        alert('Mobile link copied: ' + input.value);
+    }
+    </script>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
