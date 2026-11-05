@@ -77,10 +77,10 @@
                     <label for="date_of_birth" class="block text-sm font-bold text-slate-800 mb-1.5">
                         <i class="fa-solid fa-calendar-days text-red-600 mr-1.5"></i>Date of Birth (تاريخ الميلاد) <span class="text-red-600">*</span>
                     </label>
-                    <input type="date" id="date_of_birth" name="date_of_birth" required max="2010-01-01" min="1960-01-01"
+                    <input type="date" id="date_of_birth" name="date_of_birth" required max="2012-12-31" min="1940-01-01"
                            class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-600 text-sm transition-all bg-white"
                            value="{{ request.form.get('date_of_birth', '2003-05-15') }}">
-                    <p class="text-[11px] text-slate-400 mt-1">Printed on your student ID card.</p>
+                    <p class="text-[11px] text-blue-900 font-semibold mt-1 flex items-center"><i class="fa-solid fa-circle-check text-red-600 mr-1.5"></i>Applicants must be born in 2012 or earlier (للمواليد حتى 2012 وما قبلها فقط)</p>
                 </div>
 
                 <!-- Country -->
@@ -130,13 +130,13 @@
             <!-- University Email -->
             <div>
                 <label for="email" class="block text-sm font-bold text-slate-800 mb-1.5">
-                    <i class="fa-solid fa-envelope text-blue-700 mr-1.5"></i>Official University Email <span class="text-red-600">*</span>
+                    <i class="fa-solid fa-envelope text-blue-700 mr-1.5"></i>Email Address (البريد الإلكتروني) <span class="text-red-600">*</span>
                 </label>
-                <input type="email" id="email" name="email" required placeholder="student@student.philadelphia.edu"
+                <input type="email" id="email" name="email" required placeholder="e.g. name@gmail.com, yahoo.com, or student.edu"
                        class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-700 text-sm transition-all"
                        value="{{ request.form.get('email', '') }}">
                 <p class="text-[11px] text-blue-800 mt-1 font-semibold flex items-center">
-                    <i class="fa-solid fa-shield-halved text-red-600 mr-1"></i>Official academic email (@student.philadelphia.edu, @upenn.edu, @temple.edu, @drexel.edu, or test @univ.edu)
+                    <i class="fa-solid fa-shield-halved text-red-600 mr-1"></i>Accepts all email providers (Gmail, Yahoo, Outlook, Hotmail, University, etc.)
                 </p>
             </div>
 

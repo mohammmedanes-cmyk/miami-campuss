@@ -1,3 +1,9 @@
+databases:
+  - name: philadelphia-db
+    plan: free
+    databaseName: philadelphia_campus
+    user: campus_user
+
 services:
   - type: web
     name: miami-campus
@@ -8,3 +14,7 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
+      - key: DATABASE_URL
+        fromDatabase:
+          name: philadelphia-db
+          property: connectionString
